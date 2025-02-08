@@ -63,20 +63,27 @@ def generate_dialogue():
     }
 
     try:
+        print("Sending request to Tencent API...")  
+        print("Request Payload:", json.dumps(payload, indent=2, ensure_ascii=False))  
+
         response = requests.post(BASE_URL, json=payload, headers=headers, timeout=20)
+
+        # ✅ 让 Render Logs 显示腾讯 API 的 HTTP 状态码和返回内容
         print("Tencent API Response Status Code:", response.status_code)
-        print("Tencent API Response:", response.text)  # ✅ 让 Flask 日志里可以看到腾讯 API 具体返回内容
-        response.raise_for_status()
+        print("Tencent API Response:", response.text)  # 这里一定要确保打印 API 的返回信息
+
+        response.raise_for_status()  
         result = response.json()
 
         generated_text = result.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
 
-        # ✅ 这里确保返回正确的 CORS 头
+        # ✅ 确保返回给前端的 JSON 里包含正确的 CORS 头
         api_response = jsonify({"dialogue": generated_text})
         api_response.headers.add("Access-Control-Allow-Origin", "*")
         return api_response
 
     except requests.exceptions.RequestException as e:
+        print("Tencent API Request Failed:", str(e))  
         api_response = jsonify({"error": str(e)})
         api_response.headers.add("Access-Control-Allow-Origin", "*")
         return api_response, 500
