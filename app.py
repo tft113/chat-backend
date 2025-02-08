@@ -5,21 +5,25 @@ import requests
 import json
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})   # すべてのオリジンからのアクセスを許可
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)    # すべてのオリジンからのアクセスを許可
 
 # API情報の設定
 API_KEY = os.getenv("API_KEY", "")  # あなたのテンセントクラウド DeepSeek API キーに置き換えてください
 BASE_URL = "https://api.lkeap.cloud.tencent.com/v1/chat/completions"  # テンセントクラウド DeepSeek API アドレス
 
-@app.route('/generate_dialogue', methods=['POST'])
+@app.route('/generate_dialogue', methods=['POST', 'OPTIONS'])
 def generate_dialogue():
+    # CORS プリフライトリクエスト (OPTIONS) に対応
+    if request.method == "OPTIONS":
+        return jsonify({"message": "CORS preflight OK"}), 200
+    
     # ユーザーが入力したキャラクターとシーンの情報を取得
     data = request.json
     character1 = data.get('character1', 'レッド')
     character2 = data.get('character2', 'ポル')
     scene = data.get('scene', '魔法使いと吸血鬼についての話題を語る')
-    personality1 = data.get('personality1', 'ユーモラスな狼男')  # デフォルトの性格
-    personality2 = data.get('personality2', '理性的な吸血鬼')  # デフォルトの性格
+    personality1 = data.get('personality1', 'ユーモラスな狼男')  
+    personality2 = data.get('personality2', '理性的な吸血鬼')  
 
     # 初期の会話プロンプトを作成
     messages = [
