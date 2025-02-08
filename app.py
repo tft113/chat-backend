@@ -5,7 +5,7 @@ import requests
 import json
 
 app = Flask(__name__)
-CORS(app)  # すべてのオリジンからのアクセスを許可
+CORS(app, resources={r"/*": {"origins": "*"}})   # すべてのオリジンからのアクセスを許可
 
 # API情報の設定
 API_KEY = os.getenv("API_KEY", "")  # あなたのテンセントクラウド DeepSeek API キーに置き換えてください
