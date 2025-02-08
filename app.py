@@ -58,7 +58,7 @@ def generate_dialogue():
     payload = {
         "model": "deepseek-v3",  # 使用するモデルを指定
         "messages": messages,
-        "max_tokens": 300,  # 生成される会話の長さを増やす
+        "max_tokens": 200,  # 生成される会話の長さを増やす
         "temperature": 0.95  # 生成のランダム性を制御
     }
 
@@ -66,7 +66,7 @@ def generate_dialogue():
         print("Sending request to Tencent API...")  
         print("Request Payload:", json.dumps(payload, indent=2, ensure_ascii=False))  
 
-        response = requests.post(BASE_URL, json=payload, headers=headers, timeout=20)
+        response = requests.post(BASE_URL, json=payload, headers=headers, timeout=120)
 
         # ✅ 让 Render Logs 显示腾讯 API 的 HTTP 状态码和返回内容
         print("Tencent API Response Status Code:", response.status_code)
