@@ -15,7 +15,11 @@ BASE_URL = "https://api.lkeap.cloud.tencent.com/v1/chat/completions"  # テン�
 def generate_dialogue():
     # CORS プリフライトリクエスト (OPTIONS) に対応
     if request.method == "OPTIONS":
-        return jsonify({"message": "CORS preflight OK"}), 200
+        response = jsonify({"message": "CORS preflight OK"})
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        return response, 200
     
     # ユーザーが入力したキャラクターとシーンの情報を取得
     data = request.json
@@ -59,26 +63,24 @@ def generate_dialogue():
     }
 
     try:
-        # リクエストパラメータを出力（デバッグ用）
-        print("Request Payload:", json.dumps(payload, indent=2, ensure_ascii=False))
-
-        # リクエストを送信
-        response = requests.post(BASE_URL, json=payload, headers=headers)
-        response.raise_for_status()  # APIがエラーを返した場合、例外をスロー
+        response = requests.post(BASE_URL, json=payload, headers=headers, timeout=20)
+        print("Tencent API Response Status Code:", response.status_code)
+        print("Tencent API Response:", response.text)  # ✅ 让 Flask 日志里可以看到腾讯 API 具体返回内容
+        response.raise_for_status()
         result = response.json()
 
-        # APIレスポンスの詳細を出力（デバッグ用）
-        print("API Response:", json.dumps(result, indent=2, ensure_ascii=False))
-
-        # 生成された会話を取得
-        # テンセントクラウドAPIのレスポンス形式に応じて調整
         generated_text = result.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
 
-        # 生成された会話内容を返す
-        return jsonify({"dialogue": generated_text})
+        # ✅ 这里确保返回正确的 CORS 头
+        api_response = jsonify({"dialogue": generated_text})
+        api_response.headers.add("Access-Control-Allow-Origin", "*")
+        return api_response
+
     except requests.exceptions.RequestException as e:
-        # リクエストエラーをキャッチし、エラーメッセージを返す
-        return jsonify({"error": str(e)}), 500
+        api_response = jsonify({"error": str(e)})
+        api_response.headers.add("Access-Control-Allow-Origin", "*")
+        return api_response, 500
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000, debug=True)
