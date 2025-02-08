@@ -66,7 +66,7 @@ def generate_dialogue():
         print("Sending request to Tencent API...")  
         print("Request Payload:", json.dumps(payload, indent=2, ensure_ascii=False))  
 
-        response = requests.post(BASE_URL, json=payload, headers=headers, timeout=120)
+        response = requests.post(BASE_URL, json=payload, headers=headers)
 
         # ✅ 让 Render Logs 显示腾讯 API 的 HTTP 状态码和返回内容
         print("Tencent API Response Status Code:", response.status_code)
